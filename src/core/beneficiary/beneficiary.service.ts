@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Beneficiary } from "../beneficiary/schemas/beneficiary.schemas"
-import { CreateBeneficiaryDto } from './dto/create-beneficiary.dto';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { Beneficiary } from "./schemas/beneficiary.schemas";
+import { CreateBeneficiaryDto } from "./dto/create-beneficiary.dto";
 
 @Injectable()
 export class BeneficiaryService {
@@ -11,10 +11,7 @@ export class BeneficiaryService {
     private readonly beneficiaryModel: Model<Beneficiary>,
   ) {}
 
-  async createMany(
-    billingId: string,
-    beneficiaries: CreateBeneficiaryDto[],
-  ) {
+  async createMany(billingId: string, beneficiaries: CreateBeneficiaryDto[]) {
     const data = beneficiaries.map((b) => ({
       ...b,
       billingId,
