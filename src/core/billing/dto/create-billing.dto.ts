@@ -1,11 +1,9 @@
 export class CreateBillingDto {
-  company: string;
+  company?: string;
 
-  product: string;
+  product?: string;
 
-  value: number;
+  value?: number;
 
-  totalLives: number;
-
-  timestamps: true;
+  totalLives?: number;
 }

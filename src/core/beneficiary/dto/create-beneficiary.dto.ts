@@ -8,6 +8,4 @@ export class CreateBeneficiaryDto {
   gender: string;
 
   birthDate: string;
-
-  billing: string;
 }

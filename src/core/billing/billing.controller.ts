@@ -10,7 +10,6 @@ import {
 } from "@nestjs/common";
 
 import { BillingService } from "./billing.service";
-import { CreateBillingDto } from "./dto/create-billing.dto";
 import { FileInterceptor } from "@nestjs/platform-express";
 import type { Express } from "express";
 import express from "express";
@@ -22,11 +21,9 @@ export class BillingController {
 
   @Post()
   @UseInterceptors(FileInterceptor("file"))
-  async create(
-    @UploadedFile() file: Express.Multer.File,
-    @Body() dto: CreateBillingDto,
-  ) {
-    return this.billingService.create(file, dto);
+  async create(@UploadedFile() file: Express.Multer.File) {
+    console.log("Arquivo recebido:", file?.originalname);
+    return this.billingService.create(file);
   }
 
   @Get(":id")

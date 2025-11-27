@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 
-@Schema({ timestamps: true })
+@Schema()
 export class Billing {
   @Prop({ required: true })
   company: string;
@@ -13,9 +13,6 @@ export class Billing {
 
   @Prop({ required: true })
   totalLives: number;
-
-  @Prop({ required: true })
-  timestamps: true;
 }
 
 export const BillingSchema = SchemaFactory.createForClass(Billing);

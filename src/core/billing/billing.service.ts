@@ -1,20 +1,14 @@
-import {
-  Injectable,
-  NotFoundException,
-  InternalServerErrorException,
-} from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 
 import { Billing } from "./schemas/billing.schema";
 import { BeneficiaryService } from "../beneficiary/beneficiary.service";
-import { CreateBillingDto } from "./dto/create-billing.dto";
+
+import * as readline from "readline";
 
 import { Readable } from "stream";
-import { createInterface } from "readline";
 import { Response } from "express";
-
-import { WorkerManager } from "./worker/worker.manager";
 
 @Injectable()
 export class BillingService {
@@ -24,38 +18,36 @@ export class BillingService {
     private readonly beneficiaryService: BeneficiaryService,
   ) {}
 
-  async create(file: Express.Multer.File, dto: CreateBillingDto) {
-    try {
-      const billing = await this.billingModel.create(dto);
-
-      const manager = new WorkerManager(billing._id.toString());
-      await manager.process(async (batch) => {
-        await this.beneficiaryService.createMany(billing._id.toString(), batch);
-      });
-
-      const readable = Readable.from(file.buffer);
-      const rl = createInterface({
-        input: readable,
-        crlfDelay: Infinity,
-      });
-
-      rl.on("line", (line: string) => {
-        manager.sendLine(line);
-      });
-
-      rl.on("close", () => {
-        manager.finish();
-      });
-
-      return {
-        message: "Processing completed!",
-        billingId: billing._id,
-      };
-    } catch (err) {
-      throw new InternalServerErrorException(
-        err instanceof Error ? err.message : "Error processing billing",
-      );
+  async create(file: Express.Multer.File) {
+    if (!file) {
+      throw new Error("Nenhum arquivo enviado");
     }
+
+    const buffer = file.buffer;
+    const stream = Readable.from(buffer);
+
+    const rl = readline.createInterface({
+      input: stream,
+      crlfDelay: Infinity,
+    });
+
+    const batch: unknown[] = [];
+
+    for await (const line of rl) {
+      const parts = line.split(",");
+      batch.push({
+        company: parts[0],
+        product: parts[1],
+        value: Number(parts[2]),
+        totalLives: Number(parts[3]),
+        timestamp: new Date(),
+        fileName: file.originalname,
+        fileSize: file.size,
+      });
+    }
+
+    // salva tudo no Mongo
+    return this.billingModel.insertMany(batch);
   }
 
   async findById(id: string) {

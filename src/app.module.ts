@@ -18,7 +18,7 @@ import { BeneficiaryModule } from "./core/beneficiary/beneficiary.module";
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        uri: config.get<string>("database.uri"),
+        uri: config.get<string>("mongo.uri"),
       }),
     }),
 
